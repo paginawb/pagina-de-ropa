@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ceci & Mariana Boutique  | Tienda de ropa</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header>
+  <div class="brand">CECI <span>& MARIANA Boutique</span></div>
+  <nav aria-label="Menú principal">
+    <button id="shopBtn" onclick="showView('shop')">🏬 Tienda</button>
+    <button class="secondary" onclick="showView('cart')">🛒 Carrito (<span id="cartCount">0</span>)</button>
+    <button class="admin-nav" onclick="showView('admin')">⚙️ ADMINISTRACIÓN</button>
+  </nav>
+</header>
+<main>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+    <button class="admin-nav" onclick="showView('admin')" style="font-size:15px;padding:14px 18px">⚙️ REGISTRAR ROPA / ADMINISTRACIÓN</button>
+  </div>
+  <section id="shopView">
+    <div class="hero">
+      <div><span class="pill">NUEVA TEMPORADA</span><h1>Tu estilo,<br>tu manera.</h1><p>Descubre prendas para todos los días. Elige tu talla, agrega al carrito y prepara tu pedido.</p><button onclick="document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})">Explorar colección</button></div>
+      <div class="hero-art">👚 🛍️ 👖</div>
+    </div>
+    <div class="section-head" id="catalogo"><div><h2>Catálogo de ropa</h2><div class="muted">Precios en pesos mexicanos (MXN)</div></div></div>
+    <div class="toolbar"><input id="search" placeholder="Buscar prenda..." oninput="renderProducts()"><select id="category" onchange="renderProducts()"><option value="">Todas las categorías</option><option>Playeras</option><option>Pantalones</option><option>Chamarras</option><option>Vestidos</option><option>Calzado</option><option>Accesorios</option></select></div>
+    <div id="productGrid" class="products"></div>
+  </section>
+  <section id="cartView" class="hidden">
+    <div class="section-head"><div><h2>Tu carrito</h2><div class="muted">Revisa las prendas antes de registrar el pedido.</div></div><button class="secondary" onclick="showView('shop')">Seguir comprando</button></div>
+    <div class="panel" id="cartContents"></div>
+    <div class="panel" id="checkoutPanel">
+      <h3>Datos del cliente</h3><div class="form-grid">
+        <div class="field wide"><label>Nombre</label><input id="customerName" placeholder="Nombre del cliente"></div>
+        <div class="field wide"><label>Teléfono</label><input id="customerPhone" placeholder="Teléfono de contacto"></div>
+      </div><p class="muted">Esta versión de prueba registra el pedido en este navegador; no procesa pagos ni envía mensajes.</p>
+      <button onclick="placeOrder()">Registrar pedido</button>
+    </div>
+  </section>
+  <section id="adminView" class="hidden">
+    <div class="section-head"><div><h2>Administración</h2><div class="muted">Gestiona productos, existencias y ventas de demostración.</div></div><button class="ghost" onclick="exportData()">Exportar datos JSON</button></div>
+    <div class="stats"><div class="stat"><small>Productos en catálogo</small><strong id="statProducts">0</strong></div><div class="stat"><small>Unidades en inventario</small><strong id="statStock">0</strong></div><div class="stat"><small>Ventas registradas</small><strong id="statSales">$0</strong></div></div>
+    <div class="panel"><h3 id="formTitle">Agregar producto</h3>
+      <form id="productForm" onsubmit="saveProduct(event)">
+        <input type="hidden" id="editId">
+        <div class="form-grid">
+          <div class="field wide"><label>Nombre de la prenda</label><input id="pName" required placeholder="Ej. Playera básica"></div>
+          <div class="field"><label>Categoría</label><select id="pCategory"><option>Playeras</option><option>Pantalones</option><option>Chamarras</option><option>Vestidos</option><option>Calzado</option><option>Accesorios</option></select></div>
+          <div class="field"><label>Precio (MXN)</label><input id="pPrice" type="number" min="0" step="0.01" required placeholder="249"></div>
+          <div class="field"><label>Talla</label><select id="pSize"><option>CH</option><option>M</option><option>G</option><option>XL</option><option>Unitalla</option><option>25</option><option>26</option><option>27</option><option>28</option><option>29</option><option>30</option></select></div>
+          <div class="field"><label>Color</label><input id="pColor" required placeholder="Negro"></div>
+          <div class="field"><label>Existencias</label><input id="pStock" type="number" min="0" step="1" required placeholder="10"></div>
+          <div class="field wide">
+
+  <label for="pFoto">Fotografía de la prenda</label>
+
+  <input
+
+    id="pFoto"
+
+    type="file"
+
+    accept="image/*"
+
+  >
+
+  <img
+
+    id="pFotoPreview"
+
+    alt="Vista previa de la prenda"
+
+    style="display:none;max-width:180px;margin-top:10px;border-radius:10px;"
+
+  >
+
+</div>
+          <div class="field"><label>Icono</label><select id="pIcon"><option>👕</option><option>👖</option><option>🧥</option><option>👗</option><option>👟</option><option>👜</option><option>🧢</option><option>👚</option></select></div>
+        </div><p><button type="submit">Guardar producto</button> <button type="button" class="secondary" onclick="resetForm()">Cancelar</button></p>
+      </form>
+    </div>
+    <div class="panel"><h3>Inventario</h3><div class="table-wrap"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Talla / color</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead><tbody id="inventoryBody"></tbody></table></div></div>
+    <div class="panel"><h3>Pedidos y ventas</h3><div class="table-wrap"><table><thead><tr><th>Folio</th><th>Cliente</th><th>Fecha</th><th>Artículos</th><th>Total</th></tr></thead><tbody id="ordersBody"></tbody></table></div></div>
+    <button class="danger" onclick="resetDemo()">Restablecer datos de ejemplo</button>
+  </section>
+  <div class="foot">Prototipo demostrativo · Los datos se guardan únicamente en este navegador mediante almacenamiento local. No es todavía una tienda publicada ni tiene pagos en línea.</div>
+</main>
+<script src="app.js" defer></script>
+</body>
+</html>
